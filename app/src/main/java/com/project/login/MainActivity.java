@@ -1,6 +1,7 @@
 package com.project.login;
 
 import android.os.AsyncTask;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +17,8 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -51,49 +54,31 @@ public class MainActivity extends AppCompatActivity {
         btnSignUp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //User user = new User();
-                String email = etEmail.getText().toString();
-                String password1 = etPassword.getText().toString();
-                String password2 = etPasswordConfirm.getText().toString();
-                String username = etNickName.getText().toString();
-                String img_profile = null;
+                User user = new User();
+                user.email = etEmail.getText().toString();
+                user.password1 = etPassword.getText().toString();
+                user.password2 = etPasswordConfirm.getText().toString();
+                user.username = etNickName.getText().toString();
+                user.img_profile = null;
 
                 SignUpAPI signUpAPI = SignUpAPI.retrofit.create(SignUpAPI.class);
-                Call<ResponseBody> call = signUpAPI.insertUser(password1, password2, email, username, img_profile);
+
+                Call<ResponseBody> call = signUpAPI.insertUser(user);
                 call.enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        Log.d("response status", response.message());
-                        Log.d("response", response.code()+"");
-                        //Log.d("response", response.body().toString());
-                        Log.d("성공하였습니다", "성공");
+//                        Log.d("====response status", response.message());
+//                        Log.d("====response", response.code()+"");
+//                        Log.d("====req", "onResponse: " + response.body().email);
+//                        Log.d("====성공하였습니다", "성공");
                         //Log.d("gggg", response.body().username + " ");
                     }
 
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        Log.d("실패하였습니다", "실패");
+                        Log.d("====실패하였습니다", "실패");
                     }
                 });
-
-//                new AsyncTask<Call, Void, String>(){
-//                    @Override
-//                    protected String doInBackground(Call[] calls) {
-//
-//                        try {
-//                            return calls[0].execute().body().toString();
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-//
-//                        return null;
-//                    }
-//
-//                    @Override
-//                    protected void onPostExecute(String s) {
-//                        Log.d("내용", s);
-//                    }
-//                }.execute(call);
             }
         });
     }
@@ -101,18 +86,13 @@ public class MainActivity extends AppCompatActivity {
     interface SignUpAPI{
         String signUpUrl = "http://explog-project-dev.ap-northeast-2.elasticbeanstalk.com";
 
-        @FormUrlEncoded
         @POST("/member/signup/")
         public Call<ResponseBody> insertUser(
-                @Field("password1") String password1,
-                @Field("password2") String password2,
-                @Field("email") String email,
-                @Field("username") String username,
-                @Field("img_profile") String img_profile
+                @Body User user
                 );
 
-        //Call<List<User>> signUp(@Body User user);
         Gson gson = new GsonBuilder()
+                .serializeNulls()
                 .setLenient()
                 .create();
 
